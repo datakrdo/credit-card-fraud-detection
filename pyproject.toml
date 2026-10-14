@@ -7,6 +7,7 @@ name = "fraud-detection"
 version = "2026.1.0"
 description = "Credit card fraud detection: production pipeline and portfolio notebook"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.12"
 authors = [{ name = "datakrdo" }]
 dependencies = [
