@@ -16,25 +16,6 @@ Two deliverables:
   split, feature engineering, GPU models, evaluation, threshold, orchestrator, and a
   training/batch-scoring CLI.
 
-## Tools 🛠️
-
-- Python, pandas, NumPy
-- scikit-learn (`Pipeline`, `ColumnTransformer`, `IsotonicRegression`, `DummyClassifier`)
-- XGBoost and LightGBM on GPU (`device="cuda"` / `"gpu"`)
-- imbalanced-learn (`SMOTENC`, `RandomUnderSampler`, inside `imblearn.Pipeline`)
-- SHAP
-- matplotlib, seaborn
-- uv, ruff, pytest, GitHub Actions
-
-## Skills 🧠
-
-- Causal feature engineering (rolling windows and aggregates with no temporal leakage)
-- Classification under extreme imbalance: PR-AUC, probability calibration, cost-benefit
-- Temporal validation for event time series (date-based split, production holdout)
-- Decision-threshold optimization by expected dollar value
-- Model explainability (SHAP) and communicating results to a non-technical audience
-- Packaging an ML project as an installable package with CLI, tests, and CI
-
 ## Design decisions 🧭
 
 - **PR-AUC against prevalence, never accuracy.** A constant classifier that never flags
@@ -71,14 +52,24 @@ Two deliverables:
   holdout — choosing it there would be the same leakage as tuning any hyperparameter
   against the final evaluation set.
 
-## Limitations ⚠️
+## Tools 🛠️
 
-Synthetic dataset (Sparkov), no external validation. No device, session, or payment
-channel data. `FP_COST` (manual review cost, USD 4) is an estimate external to the
-dataset — the notebook's sensitivity section shows how much the recommendation depends
-on it. 983 cards is a small population. The model has no way to handle a card with no
-history (cold start): velocity features are zero by construction there, not by model
-error.
+- Python, pandas, NumPy
+- scikit-learn (`Pipeline`, `ColumnTransformer`, `IsotonicRegression`, `DummyClassifier`)
+- XGBoost and LightGBM on GPU (`device="cuda"` / `"gpu"`)
+- imbalanced-learn (`SMOTENC`, `RandomUnderSampler`, inside `imblearn.Pipeline`)
+- SHAP
+- matplotlib, seaborn
+- uv, ruff, pytest, GitHub Actions
+
+## Skills 🧠
+
+- Causal feature engineering (rolling windows and aggregates with no temporal leakage)
+- Classification under extreme imbalance: PR-AUC, probability calibration, cost-benefit
+- Temporal validation for event time series (date-based split, production holdout)
+- Decision-threshold optimization by expected dollar value
+- Model explainability (SHAP) and communicating results to a non-technical audience
+- Packaging an ML project as an installable package with CLI, tests, and CI
 
 ## Structure
 
@@ -117,6 +108,15 @@ uv run fraud score transactions.csv --model models/xgboost.joblib -o scores.csv
 
 `uv run jupyter nbconvert --execute --inplace fraud-portfolio.ipynb` reproduces the
 notebook from scratch.
+
+## Limitations ⚠️
+
+Synthetic dataset (Sparkov), no external validation. No device, session, or payment
+channel data. `FP_COST` (manual review cost, USD 4) is an estimate external to the
+dataset — the notebook's sensitivity section shows how much the recommendation depends
+on it. 983 cards is a small population. The model has no way to handle a card with no
+history (cold start): velocity features are zero by construction there, not by model
+error.
 
 ## License
 

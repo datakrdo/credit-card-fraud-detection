@@ -17,25 +17,6 @@ Dos entregables:
   feature engineering, modelos GPU, evaluación, umbral, orquestador y CLI de entrenamiento
   y scoring batch.
 
-## Herramientas 🛠️
-
-- Python, pandas, NumPy
-- scikit-learn (`Pipeline`, `ColumnTransformer`, `IsotonicRegression`, `DummyClassifier`)
-- XGBoost y LightGBM sobre GPU (`device="cuda"` / `"gpu"`)
-- imbalanced-learn (`SMOTENC`, `RandomUnderSampler`, dentro de `imblearn.Pipeline`)
-- SHAP
-- matplotlib, seaborn
-- uv, ruff, pytest, GitHub Actions
-
-## Habilidades 🧠
-
-- Ingeniería de features causal (rolling windows y agregados sin fuga temporal)
-- Clasificación con desbalance extremo: PR-AUC, calibración de probabilidades, costo-beneficio
-- Validación temporal para series de eventos (split por fecha, holdout de producción)
-- Optimización de umbral de decisión por valor esperado en dólares
-- Explicabilidad de modelos (SHAP) y comunicación de resultados a una audiencia no técnica
-- Empaquetado de un proyecto de ML como paquete instalable con CLI, tests y CI
-
 ## Decisiones de diseño 🧭
 
 - **PR-AUC contra prevalencia, nunca accuracy.** Un clasificador constante que nunca marca
@@ -74,14 +55,24 @@ Dos entregables:
   holdout — elegirlo ahí sería la misma fuga que tunear cualquier hiperparámetro contra el
   conjunto de evaluación final.
 
-## Limitaciones ⚠️
+## Herramientas 🛠️
 
-Dataset sintético (Sparkov), sin validación externa. Sin datos de dispositivo, sesión ni
-canal de pago. `FP_COST` (costo de revisión manual, USD 4) es una estimación externa al
-dataset — la sección de sensibilidad de la notebook muestra cuánto depende de ella la
-recomendación. 983 tarjetas es una población chica. El modelo no tiene forma de manejar una
-tarjeta sin historial (arranque en frío): ahí las features de velocidad valen cero por
-construcción, no por un error del modelo.
+- Python, pandas, NumPy
+- scikit-learn (`Pipeline`, `ColumnTransformer`, `IsotonicRegression`, `DummyClassifier`)
+- XGBoost y LightGBM sobre GPU (`device="cuda"` / `"gpu"`)
+- imbalanced-learn (`SMOTENC`, `RandomUnderSampler`, dentro de `imblearn.Pipeline`)
+- SHAP
+- matplotlib, seaborn
+- uv, ruff, pytest, GitHub Actions
+
+## Habilidades 🧠
+
+- Ingeniería de features causal (rolling windows y agregados sin fuga temporal)
+- Clasificación con desbalance extremo: PR-AUC, calibración de probabilidades, costo-beneficio
+- Validación temporal para series de eventos (split por fecha, holdout de producción)
+- Optimización de umbral de decisión por valor esperado en dólares
+- Explicabilidad de modelos (SHAP) y comunicación de resultados a una audiencia no técnica
+- Empaquetado de un proyecto de ML como paquete instalable con CLI, tests y CI
 
 ## Estructura
 
@@ -120,6 +111,15 @@ uv run fraud score transacciones.csv --model models/xgboost.joblib -o scores.csv
 
 `uv run jupyter nbconvert --execute --inplace fraud-portfolio_es.ipynb` reproduce la
 notebook desde cero.
+
+## Limitaciones ⚠️
+
+Dataset sintético (Sparkov), sin validación externa. Sin datos de dispositivo, sesión ni
+canal de pago. `FP_COST` (costo de revisión manual, USD 4) es una estimación externa al
+dataset — la sección de sensibilidad de la notebook muestra cuánto depende de ella la
+recomendación. 983 tarjetas es una población chica. El modelo no tiene forma de manejar una
+tarjeta sin historial (arranque en frío): ahí las features de velocidad valen cero por
+construcción, no por un error del modelo.
 
 ## Licencia
 
