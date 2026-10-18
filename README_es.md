@@ -27,7 +27,7 @@ Dos entregables:
 - matplotlib, seaborn
 - uv, ruff, pytest, GitHub Actions
 
-## Skills 🧠
+## Habilidades 🧠
 
 - Ingeniería de features causal (rolling windows y agregados sin fuga temporal)
 - Clasificación con desbalance extremo: PR-AUC, calibración de probabilidades, costo-beneficio
@@ -74,26 +74,16 @@ Dos entregables:
   holdout — elegirlo ahí sería la misma fuga que tunear cualquier hiperparámetro contra el
   conjunto de evaluación final.
 
-## Quick start 🚀
+## Limitaciones ⚠️
 
-`data/` está en `.gitignore`: descargar el dataset Sparkov desde
-[Kaggle](https://www.kaggle.com/datasets/kartik2112/fraud-detection) y colocar
-`fraudTrain.csv`/`fraudTest.csv` en `data/raw/` antes de correr lo siguiente.
+Dataset sintético (Sparkov), sin validación externa. Sin datos de dispositivo, sesión ni
+canal de pago. `FP_COST` (costo de revisión manual, USD 4) es una estimación externa al
+dataset — la sección de sensibilidad de la notebook muestra cuánto depende de ella la
+recomendación. 983 tarjetas es una población chica. El modelo no tiene forma de manejar una
+tarjeta sin historial (arranque en frío): ahí las features de velocidad valen cero por
+construcción, no por un error del modelo.
 
-```bash
-uv sync --all-extras
-uv run ruff check src/ tests/ && uv run ruff format --check src/ tests/
-uv run pytest -q
-
-uv run fraud train --data data/raw/fraudTrain.csv --model xgboost --out models/
-uv run fraud evaluate --model models/xgboost.joblib --data data/raw/fraudTest.csv
-uv run fraud score transacciones.csv --model models/xgboost.joblib -o scores.csv
-```
-
-`uv run jupyter nbconvert --execute --inplace fraud-portfolio_es.ipynb` reproduce la
-notebook desde cero.
-
-## Diseño por módulo 📦
+## Estructura
 
 - `src/fraud/data.py` — carga, valida esquema, castea `cc_num` a string, ordena
   causalmente, y corta `fraudTrain.csv` en train/validación por fecha (`TemporalSplit`).
@@ -112,11 +102,25 @@ notebook desde cero.
 - `src/fraud/cli.py` — subcomandos `train` / `score` / `evaluate`.
 - `src/fraud/explainability.py` — SHAP sobre el modelo final, detrás del extra `[shap]`.
 
-## Datos y limitaciones ⚠️
+## Inicio rápido 🚀
 
-Dataset sintético (Sparkov), sin validación externa. Sin datos de dispositivo, sesión ni
-canal de pago. `FP_COST` (costo de revisión manual, USD 4) es una estimación externa al
-dataset — la sección de sensibilidad de la notebook muestra cuánto depende de ella la
-recomendación. 983 tarjetas es una población chica. El modelo no tiene forma de manejar una
-tarjeta sin historial (arranque en frío): ahí las features de velocidad valen cero por
-construcción, no por un error del modelo.
+`data/` está en `.gitignore`: descargar el dataset Sparkov desde
+[Kaggle](https://www.kaggle.com/datasets/kartik2112/fraud-detection) y colocar
+`fraudTrain.csv`/`fraudTest.csv` en `data/raw/` antes de correr lo siguiente.
+
+```bash
+uv sync --all-extras
+uv run ruff check src/ tests/ && uv run ruff format --check src/ tests/
+uv run pytest -q
+
+uv run fraud train --data data/raw/fraudTrain.csv --model xgboost --out models/
+uv run fraud evaluate --model models/xgboost.joblib --data data/raw/fraudTest.csv
+uv run fraud score transacciones.csv --model models/xgboost.joblib -o scores.csv
+```
+
+`uv run jupyter nbconvert --execute --inplace fraud-portfolio_es.ipynb` reproduce la
+notebook desde cero.
+
+## Licencia
+
+MIT — ver el archivo `LICENSE`.

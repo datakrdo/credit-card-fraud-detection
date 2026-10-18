@@ -71,6 +71,34 @@ Two deliverables:
   holdout — choosing it there would be the same leakage as tuning any hyperparameter
   against the final evaluation set.
 
+## Limitations ⚠️
+
+Synthetic dataset (Sparkov), no external validation. No device, session, or payment
+channel data. `FP_COST` (manual review cost, USD 4) is an estimate external to the
+dataset — the notebook's sensitivity section shows how much the recommendation depends
+on it. 983 cards is a small population. The model has no way to handle a card with no
+history (cold start): velocity features are zero by construction there, not by model
+error.
+
+## Structure
+
+- `src/fraud/data.py` — loads, validates schema, casts `cc_num` to string, sorts
+  causally, and cuts `fraudTrain.csv` into train/validation by date (`TemporalSplit`).
+- `src/fraud/features.py` — `build_features`, pure and stateless: temporal features,
+  amount, causal per-card velocity, merchant/category novelty, and `distance_km` (computed,
+  not a model input).
+- `src/fraud/modeling.py` — `MODEL_SPECS` registry (`dummy`, `logreg`, `lightgbm`,
+  `xgboost`), the last two using GPU (`device="cuda"`/`"gpu"`) with graceful degradation
+  if the `[gpu]` extras aren't installed.
+- `src/fraud/evaluation.py` — PR-AUC against prevalence, precision@k, confusion matrix.
+- `src/fraud/threshold.py` — vectorized threshold sweep, net savings, marginal analysis,
+  and `FP_COST` sensitivity.
+- `src/fraud/pipeline.py` — single orchestrator: split → features → fit → isotonic
+  calibration on validation → frozen threshold. `FraudModel` packages the three
+  together, because a threshold without its model isn't a reproducible decision.
+- `src/fraud/cli.py` — `train` / `score` / `evaluate` subcommands.
+- `src/fraud/explainability.py` — SHAP on the final model, behind the `[shap]` extra.
+
 ## Quick start 🚀
 
 `data/` is in `.gitignore`: download the Sparkov dataset from
@@ -90,30 +118,6 @@ uv run fraud score transactions.csv --model models/xgboost.joblib -o scores.csv
 `uv run jupyter nbconvert --execute --inplace fraud-portfolio.ipynb` reproduces the
 notebook from scratch.
 
-## Module design 📦
+## License
 
-- `src/fraud/data.py` — loads, validates schema, casts `cc_num` to string, sorts
-  causally, and cuts `fraudTrain.csv` into train/validation by date (`TemporalSplit`).
-- `src/fraud/features.py` — `build_features`, pure and stateless: temporal features,
-  amount, causal per-card velocity, merchant/category novelty, and `distance_km` (computed,
-  not a model input).
-- `src/fraud/modeling.py` — `MODEL_SPECS` registry (`dummy`, `logreg`, `lightgbm`,
-  `xgboost`), the last two using GPU (`device="cuda"`/`"gpu"`) with graceful degradation
-  if the `[gpu]` extras aren't installed.
-- `src/fraud/evaluation.py` — PR-AUC against prevalence, precision@k, confusion matrix.
-- `src/fraud/threshold.py` — vectorized threshold sweep, net savings, marginal analysis,
-  and `FP_COST` sensitivity.
-- `src/fraud/pipeline.py` — single orchestrator: split → features → fit → isotonic
-  calibration on validation → frozen threshold. `FraudModel` packages the three
-  together, because a threshold without its model isn't a reproducible decision.
-- `src/fraud/cli.py` — `train` / `score` / `evaluate` subcommands.
-- `src/fraud/explainability.py` — SHAP on the final model, behind the `[shap]` extra.
-
-## Data and limitations ⚠️
-
-Synthetic dataset (Sparkov), no external validation. No device, session, or payment
-channel data. `FP_COST` (manual review cost, USD 4) is an estimate external to the
-dataset — the notebook's sensitivity section shows how much the recommendation depends
-on it. 983 cards is a small population. The model has no way to handle a card with no
-history (cold start): velocity features are zero by construction there, not by model
-error.
+MIT — see the `LICENSE` file.
