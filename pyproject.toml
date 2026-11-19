@@ -11,7 +11,7 @@ license = "MIT"
 requires-python = ">=3.12"
 authors = [{ name = "datakrdo" }]
 dependencies = [
-    "numpy>=2.5",
+    "numpy>=2.5.5",
     "pandas>=3.0.6",
     "scikit-learn>=1.9.1",
     "matplotlib>=3.11",
