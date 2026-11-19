@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-gpu = ["xgboost>=3.4", "lightgbm>=4.7"]
+gpu = ["xgboost>=3.4.1", "lightgbm>=4.7"]
 shap = ["shap>=0.52"]
 imb = ["imbalanced-learn>=0.14"]
 databricks = ["mlflow>=3.0", "databricks-feature-engineering>=0.12"]
