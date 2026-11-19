@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: pip # also reads uv.lock
+  - package-ecosystem: uv # the pip ecosystem bumps pyproject.toml but not uv.lock, so CI's --locked fails
     directory: /
     schedule:
       interval: weekly
