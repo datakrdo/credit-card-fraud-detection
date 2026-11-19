@@ -28,7 +28,7 @@ all = ["fraud-detection[gpu,shap,imb,databricks]"]
 
 [dependency-groups]
 dev = [
-    "pytest>=9.1",
+    "pytest>=9.2.0",
     "ruff>=0.16.9",
     "nbconvert>=7.17",
     "nbformat>=5.11",
