@@ -1,0 +1,21 @@
+resources:
+  schemas:
+    raw:
+      catalog_name: ${var.catalog}
+      name: raw
+    features:
+      catalog_name: ${var.catalog}
+      name: features
+    ml:
+      catalog_name: ${var.catalog}
+      name: ml
+    monitoring:
+      catalog_name: ${var.catalog}
+      name: monitoring
+
+  volumes:
+    landing:
+      catalog_name: ${var.catalog}
+      schema_name: raw
+      name: landing
+      volume_type: MANAGED

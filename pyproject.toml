@@ -23,7 +23,8 @@ dependencies = [
 gpu = ["xgboost>=3.4", "lightgbm>=4.7"]
 shap = ["shap>=0.52"]
 imb = ["imbalanced-learn>=0.14"]
-all = ["fraud-detection[gpu,shap,imb]"]
+databricks = ["mlflow>=3.0", "databricks-feature-engineering>=0.12"]
+all = ["fraud-detection[gpu,shap,imb,databricks]"]
 
 [dependency-groups]
 dev = [
@@ -44,6 +45,7 @@ module-name = "fraud"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100

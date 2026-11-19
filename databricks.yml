@@ -1,0 +1,28 @@
+bundle:
+  name: fraud-mlops
+
+artifacts:
+  fraud_whl:
+    type: whl
+    build: uv build --wheel
+    path: .
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog (must already exist)
+    default: fraud
+  warehouse_id:
+    description: SQL warehouse for the dashboard and the alert (pass with --var)
+  team_group:
+    description: Workspace group allowed to read the dashboard / query the endpoint
+    default: users
+
+targets:
+  dev:
+    default: true
+    # No `mode: development`: it prefixes schema names, and the jobs address fraud.<schema>.<table> directly.
+    workspace:
+      profile: datakrdo # create it first: databricks auth login --host <workspace-url> --profile datakrdo

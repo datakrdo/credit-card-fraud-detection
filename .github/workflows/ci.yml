@@ -6,13 +6,16 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: "3.12"
           enable-cache: true
@@ -21,10 +24,15 @@ jobs:
         run: uv sync --locked --all-extras
 
       - name: Lint (ruff check)
-        run: uv run ruff check src/ tests/
+        run: uv run ruff check src/ tests/ jobs/
 
       - name: Format check (ruff format)
-        run: uv run ruff format --check src/ tests/
+        run: uv run ruff format --check src/ tests/ jobs/
 
       - name: Test (pytest)
         run: uv run pytest -q
+
+      - name: Dependency audit (pip-audit)
+        run: |
+          uv export --locked --no-hashes --all-extras --no-emit-project -o requirements-audit.txt
+          uvx pip-audit -r requirements-audit.txt --no-deps

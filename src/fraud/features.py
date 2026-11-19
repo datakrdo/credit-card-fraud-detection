@@ -94,8 +94,13 @@ def _card_history_features(frame: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def build_features(frame: pd.DataFrame) -> pd.DataFrame:
+def build_features(frame: pd.DataFrame, *, history: pd.DataFrame | None = None) -> pd.DataFrame:
     """Derive the full feature set from a raw, causally-sorted Sparkov frame.
+
+    `history` is earlier traffic (already seen by the model's cards) used only as
+    context: validation, holdout and each scoring batch need the same card history
+    the live system would have, or every card starts "cold" and train/serve
+    features skew. Only rows of `frame` are returned (index reset when history is used).
 
     Pure function of `frame`: no fitted state, so the same call produces
     identical columns whether it runs in the notebook, `pipeline.py`, or
@@ -105,6 +110,14 @@ def build_features(frame: pd.DataFrame) -> pd.DataFrame:
     are left in the returned frame; `data.LEAKAGE_COLUMNS` are dropped later,
     by the modeling pipeline, so this function stays reusable for EDA too.
     """
+
+    if history is not None and len(history):
+        combined = pd.concat(
+            [history.assign(_new=False), frame.assign(_new=True)], ignore_index=True
+        ).sort_values(["cc_num", "trans_date_trans_time"], kind="stable", ignore_index=True)
+        feats = build_features(combined)
+        is_new = feats.pop("_new").astype(bool)
+        return feats.loc[is_new].reset_index(drop=True)
 
     hour = frame["trans_date_trans_time"].dt.hour
     age_years = (frame["trans_date_trans_time"] - frame["dob"]).dt.days / 365.25

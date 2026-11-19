@@ -118,12 +118,13 @@ else:
     )
 
 
-def build_pipeline(name: str, *, prevalence: float) -> Pipeline:
+def build_pipeline(name: str, *, prevalence: float, device: str | None = None) -> Pipeline:
     """Build an unfitted preprocessing-plus-estimator pipeline for a registered model.
 
     `prevalence` (fraud rate of the training fold) drives `scale_pos_weight`,
     the loss-reweighting alternative to resampling -- see the notebook section
-    on why this project doesn't use SMOTE.
+    on why this project doesn't use SMOTE. `device` overrides the boosters' GPU
+    default (serving and CI run on CPU).
     """
 
     if name not in MODEL_SPECS:
@@ -132,5 +133,8 @@ def build_pipeline(name: str, *, prevalence: float) -> Pipeline:
             "(install the [gpu] extra for lightgbm/xgboost)."
         )
     spec = MODEL_SPECS[name]
-    estimator = spec.estimator_cls(**spec.defaults(prevalence))
+    params = spec.defaults(prevalence)
+    if device and "device" in params:  # "cpu" for serverless/CI; "cuda" for a local GPU
+        params["device"] = "gpu" if (name == "lightgbm" and device == "cuda") else device
+    estimator = spec.estimator_cls(**params)
     return Pipeline([("preprocess", build_preprocessor()), ("model", estimator)])

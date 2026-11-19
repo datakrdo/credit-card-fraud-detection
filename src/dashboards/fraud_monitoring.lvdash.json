@@ -1,0 +1,418 @@
+{
+  "datasets": [
+    {
+      "name": "recall",
+      "displayName": "Recall (labels arrive 7 days late)",
+      "queryLines": [
+        "SELECT date, value AS recall FROM daily_metrics WHERE metric = 'recall' ORDER BY date "
+      ]
+    },
+    {
+      "name": "savings",
+      "displayName": "Net savings ratio",
+      "queryLines": [
+        "SELECT date, value AS savings_ratio FROM daily_metrics WHERE metric = 'savings_ratio' ORDER BY date "
+      ]
+    },
+    {
+      "name": "alert_rate",
+      "displayName": "Alert rate",
+      "queryLines": [
+        "SELECT date, value AS alert_rate FROM daily_metrics WHERE metric = 'alert_rate' ORDER BY date "
+      ]
+    },
+    {
+      "name": "score_psi",
+      "displayName": "Score PSI",
+      "queryLines": [
+        "SELECT date, value AS psi_score FROM daily_metrics WHERE metric = 'psi_score' ORDER BY date "
+      ]
+    },
+    {
+      "name": "feature_psi",
+      "displayName": "Top 6 feature PSI",
+      "queryLines": [
+        "SELECT date, metric AS feature, value AS psi FROM daily_metrics WHERE metric IN (SELECT metric FROM daily_metrics WHERE metric LIKE 'psi_%' AND metric <> 'psi_score' GROUP BY metric ORDER BY max(value) DESC LIMIT 6) ORDER BY date "
+      ]
+    },
+    {
+      "name": "alerts",
+      "displayName": "Alerts",
+      "queryLines": [
+        "SELECT date, scenario, severity, rule, round(value, 3) AS value, round(`limit`, 3) AS limit_value FROM alerts ORDER BY date DESC, severity "
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "monitor",
+      "displayName": "Monitoring",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {
+          "widget": {
+            "name": "w_recall",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "recall",
+                  "fields": [
+                    {
+                      "name": "date",
+                      "expression": "`date`"
+                    },
+                    {
+                      "name": "recall",
+                      "expression": "`recall`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Date"
+                },
+                "y": {
+                  "fieldName": "recall",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Recall vs validation (frozen threshold)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Recall vs validation (frozen threshold)"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "w_savings",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "savings",
+                  "fields": [
+                    {
+                      "name": "date",
+                      "expression": "`date`"
+                    },
+                    {
+                      "name": "savings_ratio",
+                      "expression": "`savings_ratio`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Date"
+                },
+                "y": {
+                  "fieldName": "savings_ratio",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Net savings / fraud dollars"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Net savings / fraud dollars"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "w_rate",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "alert_rate",
+                  "fields": [
+                    {
+                      "name": "date",
+                      "expression": "`date`"
+                    },
+                    {
+                      "name": "alert_rate",
+                      "expression": "`alert_rate`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Date"
+                },
+                "y": {
+                  "fieldName": "alert_rate",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Alert rate"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Alert rate"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "w_spsi",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "score_psi",
+                  "fields": [
+                    {
+                      "name": "date",
+                      "expression": "`date`"
+                    },
+                    {
+                      "name": "psi_score",
+                      "expression": "`psi_score`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Date"
+                },
+                "y": {
+                  "fieldName": "psi_score",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Score PSI (warn 0.10, critical 0.25)"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Score PSI (warn 0.10, critical 0.25)"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "w_fpsi",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "feature_psi",
+                  "fields": [
+                    {
+                      "name": "date",
+                      "expression": "`date`"
+                    },
+                    {
+                      "name": "psi",
+                      "expression": "`psi`"
+                    },
+                    {
+                      "name": "feature",
+                      "expression": "`feature`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "date",
+                  "scale": {
+                    "type": "temporal"
+                  },
+                  "displayName": "Date"
+                },
+                "y": {
+                  "fieldName": "psi",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Feature PSI, top 6"
+                },
+                "color": {
+                  "fieldName": "feature",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Feature PSI, top 6"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "alerts_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "alerts",
+                  "fields": [
+                    {
+                      "name": "date",
+                      "expression": "`date`"
+                    },
+                    {
+                      "name": "scenario",
+                      "expression": "`scenario`"
+                    },
+                    {
+                      "name": "severity",
+                      "expression": "`severity`"
+                    },
+                    {
+                      "name": "rule",
+                      "expression": "`rule`"
+                    },
+                    {
+                      "name": "value",
+                      "expression": "`value`"
+                    },
+                    {
+                      "name": "limit_value",
+                      "expression": "`limit_value`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "date",
+                    "displayName": "date"
+                  },
+                  {
+                    "fieldName": "scenario",
+                    "displayName": "scenario"
+                  },
+                  {
+                    "fieldName": "severity",
+                    "displayName": "severity"
+                  },
+                  {
+                    "fieldName": "rule",
+                    "displayName": "rule"
+                  },
+                  {
+                    "fieldName": "value",
+                    "displayName": "value"
+                  },
+                  {
+                    "fieldName": "limit_value",
+                    "displayName": "limit_value"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Alerts"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 12,
+            "height": 7
+          }
+        }
+      ]
+    }
+  ]
+}

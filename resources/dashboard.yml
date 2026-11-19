@@ -1,0 +1,11 @@
+resources:
+  dashboards:
+    fraud_monitoring:
+      display_name: "Fraud model monitoring"
+      file_path: ../src/dashboards/fraud_monitoring.lvdash.json
+      warehouse_id: ${var.warehouse_id}
+      dataset_catalog: ${var.catalog}
+      dataset_schema: monitoring
+      permissions:
+        - level: CAN_READ
+          group_name: ${var.team_group}

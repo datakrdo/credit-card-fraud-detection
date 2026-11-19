@@ -1,0 +1,10 @@
+{
+  "served_entities": [
+    {
+      "entity_name": "__CATALOG__.ml.fraud_model",
+      "entity_version": "__VERSION__",
+      "workload_size": "Small",
+      "scale_to_zero_enabled": true
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+resources:
+  jobs:
+    train_register:
+      name: fraud-train-register
+      parameters:
+        - name: through_date
+          default: "" # empty: train from the landing CSVs; YYYY-MM-DD: retrain from the tables
+        - name: test_days
+          default: "14" # holdout length when retraining from the tables
+        - name: valid_days
+          default: "0" # 0 = last 20% of rows; N = last N days (use after a drift)
+        - name: half_life_days
+          default: "0" # 0 = off; e.g. 14 weights recent data more after a drift
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies: &deps
+              - ../dist/*.whl
+              - mlflow>=3.0
+              - databricks-feature-engineering>=0.12
+              - xgboost>=3.4
+      tasks:
+        - task_key: train_register
+          environment_key: default
+          spark_python_task:
+            python_file: ../jobs/train_register.py
+            parameters:
+              - "--catalog"
+              - "${var.catalog}"
+              - "--through-date"
+              - "{{job.parameters.through_date}}"
+              - "--test-days"
+              - "{{job.parameters.test_days}}"
+              - "--valid-days"
+              - "{{job.parameters.valid_days}}"
+              - "--half-life-days"
+              - "{{job.parameters.half_life_days}}"
+              - "--experiment"
+              - "/Users/${workspace.current_user.userName}/fraud-mlops"
+
+    daily_replay:
+      name: fraud-daily-replay-monitor
+      description: Replay the next day of holdout traffic, refresh card state, score, monitor.
+      timeout_seconds: 1200 # a day takes ~3 min; one hung serverless task must not block the chain
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: UTC
+        pause_status: PAUSED # unpause for the demo; one run = one simulated day
+      parameters:
+        - name: scenario
+          default: none # none | amount_inflation | new_fraud_pattern | category_shift
+        - name: onset_day
+          default: "21"
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies: *deps
+      tasks:
+        - task_key: simulate_day
+          environment_key: default
+          spark_python_task:
+            python_file: ../jobs/simulate_day.py
+            parameters:
+              - "--catalog"
+              - "${var.catalog}"
+              - "--scenario"
+              - "{{job.parameters.scenario}}"
+              - "--onset-day"
+              - "{{job.parameters.onset_day}}"
+        - task_key: refresh_features
+          depends_on: [{task_key: simulate_day}]
+          environment_key: default
+          spark_python_task:
+            python_file: ../jobs/refresh_features.py
+            parameters: ["--catalog", "${var.catalog}"]
+        - task_key: monitor
+          depends_on: [{task_key: simulate_day}]
+          environment_key: default
+          spark_python_task:
+            python_file: ../jobs/monitor.py
+            parameters: ["--catalog", "${var.catalog}"]
+        - task_key: retention
+          depends_on: [{task_key: monitor}]
+          environment_key: default
+          spark_python_task:
+            python_file: ../jobs/retention.py
+            parameters: ["--catalog", "${var.catalog}"]
