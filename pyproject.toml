@@ -23,7 +23,7 @@ dependencies = [
 gpu = ["xgboost>=3.4", "lightgbm>=4.7"]
 shap = ["shap>=0.52"]
 imb = ["imbalanced-learn>=0.14"]
-databricks = ["mlflow>=3.0", "databricks-feature-engineering>=0.12"]
+databricks = ["mlflow>=3.18.0", "databricks-feature-engineering>=0.12"]
 all = ["fraud-detection[gpu,shap,imb,databricks]"]
 
 [dependency-groups]
